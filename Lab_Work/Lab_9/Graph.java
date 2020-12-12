@@ -7,7 +7,7 @@ public class Graph {
     private Bag<Integer>[] adj;
 
     /**
-     * Initializes an empty graph with {@code V} vertices and 0 edges.
+     * Initialize an empty graph with {@code V} vertices and 0 edges.
      * param V the number of vertices
      * @param  V number of vertices
      * @throws IllegalArgumentException if {@code V < 0}
