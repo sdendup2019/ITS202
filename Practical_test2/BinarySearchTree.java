@@ -1,185 +1,191 @@
-import java.util.*;
+public class BinarySearchTree<Key extends Comparable<Key>, Value> {
 
-public class BinarySearchTree<Key extends Comparable<Key>, Value>  {
-    private Node root;
-    int size = 0;             // root of BST
-
+    private Node root;      
+    
     private class Node {
-        private Key key;           
-        private Value val;        
-        private Node left, right;  // left and right subtrees
-
-        public Node(Key key, Value val) {
+        Key key;
+        Value val;
+        Node left;
+        Node right;
+        int N;
+        
+        public Node(Key key, Value value, Node left, Node right) {
             this.key = key;
-            this.val = val;
+            this.val = value;
+            this.left = left;
+            this.right = right;
+            this.N = 1;
         }
     }
-
-    public boolean isEmpty() {
-        if(size == 0){
-            return true;
-        }
-        return false;
+    
+    public BinarySearchTree() {
+        root = null;
     }
 
-    public int size() {
-      return size;
-    }
 
     public Value get(Key key) {
-        if(key == null){
-            System.out.println("argument to get value() is null");
-        }
-        Node x = root;
-        while(x.key != key){
-            int cmp = key.compareTo(x.key);
-            if(cmp < 0)         x = x.left;            
-            else if(cmp > 0)    x = x.right;
-        }
-        if(x.key == key){
-            System.out.println(x.val);
-        }
+        return get(key, root);
+    }
+    
+    private Value get(Key key, Node x) {
+        if (x == null) return null;
+        int cmp = key.compareTo(x.key);
+        
+        if (cmp < 0)
+            return get(key, x.left);
+        else if (cmp > 0)
+            return get(key, x.right);
+        
         return x.val;
     }
-
-  
+    
     public void put(Key key, Value val) {
-        Node newest = new Node(key,val);
-        if(root == null){
-            root = newest;
+        root = put(root, key, val);
+    }
+    
+    private Node put(Node x, Key key, Value val) {
+        if (x == null) {
+            return new Node(key, val, null, null);
         }
-        else{
-            Node x = root;
-            Node parent;
-            while(true){
-                parent = x;
-                int cmp = key.compareTo(x.key);
-                if(cmp < 0){
-                    x = x.left;
-                    if(x == null){
-                        parent.left = newest;
-                        size = size + 1;
-                        return;
-                    }
-                    else if(x.key == key){
-                        x.val = val;
-                        return;
-                    }
-                }
-                else if(cmp > 0){
-                    x = x.right;
-                    if(x == null){
-                        parent.right = newest;
-                        size = size + 1;
-                        return;
-                    }
-                    else if(x.key == key){
-                        x.val = val;
-                        return;
-                    }
-                }
-            }
+        
+        int cmp = key.compareTo(x.key);
+        if (cmp == 0) {
+            x.val = val;
+            return x;
+        } else if (cmp < 0) {
+            x.left = put(x.left, key, val);
+        } else if (cmp > 0) {
+            x.right = put(x.right, key, val);
         }
-        size = size + 1;
-      
+        x.N = size(x.left) + size(x.right) + 1;
+        return x;
+    }
+    
+    public int size() {
+        return size(root);
+    }
+    public boolean isEmpty() {
+        return root == null;
+    }
+    
+    private int size(Node x) {
+        if (x == null) return 0;
+        return x.N;
     }
 
     public Key min() {
-       if(isEmpty()){
-        throw new NoSuchElementException("call min() is with empty symbol table");
-       }
-       else{
-            Node x = root;
-            if(x.left != null){
-                x = x.left;
-            }
-            return x.key;
-       }
-    } 
-
-    public Key floor(Key key){
-        if(isEmpty()){
-            System.out.println("calls floor() with empty symbol table");
-        }
-        Node x = root;
-        Node parent = null;
-        while(x != null){
-            parent = x;
-            int cmp = key.compareTo(parent.key);
-            if(key == null)     System.out.println("calls floor() with a null key");
-            if(cmp == 0)        return parent.key;
-            if(cmp < 0)         x = parent.left;
-            else if(cmp > 0)    x = parent.right;
-            
-                int cm = key.compareTo(x.key);
-                if(cm < 0 )     return parent.key;
-                else            x = parent.right;
-            
-        }
-        return parent.key;
+        if (isEmpty()) 
+            return null;
+        return min(root).key;
     }
-
-    public Key select(Key key,Value val){
-        if(isEmpty()){
-            System.out.println("calls floor() with empty symbol table");
-        }
-        Node x = root;
-        Node parent = null;
-        while(x != null){
-            parent = x;
-            int cmp = key.compareTo(parent.key);
-            if(key == null)     System.out.println("calls floor() with empty symbol table");
-            if(cmp > 0)         x = parent.right;  
-            else if(cmp < 0)    x = parent.left;
-                
-                int cm = key.compareTo(parent.key);
-                if(cm > 0 )     return x.key;  
-                else            x = parent.left;
-            
-        }
-        return parent.key;
+    private Node min(Node x) {
+        if (x == null)  
+            return null;
+        if (x.left != null)
+            return min(x.left);
+        else
+            return x;
     }
     
-    public void keys(Key lo, Key hi){
-        if(lo == null || hi == null){
-            System.out.println("key is null");
+    public Key floor(Key key) {
+        Node n = floor(root, key);
+        if (n != null) return n.key;
+        return key;
+    }
+    
+    private Node floor(Node x, Key key) {
+        if (x == null) return null;
+        
+        int cmp = key.compareTo(x.key);
+        if (cmp < 0) 
+            return floor(x.left, key);
+        else if (cmp > 0) {
+            Node t = floor(x.right, key);
+            if (t == null) 
+                return x;
+            else
+                return t;
         }
-        Node x = root;
-        Node parent;
-        while(x != null) {
-            parent = x;
-            if(parent == null)          return; 
-            
-            int cmp = lo.compareTo(parent.key);
-            int cm = hi.compareTo(parent.key); 
-            if (cmp < 0)                x = parent.left;
-            if (cmp <= 0 && cm >= 0)    System.out.print(parent.key + " ");  
-            if (cm > 0)                 x = parent.right;
-        }
+        return x;
+    }
+    public Key select(int rank) {
+        return select(root, rank);
     }
 
+    private Key select(Node x, int rank) {
+        if (x == null) return null;
+        
+        int t = size(x.left);
+        if(rank < t) return select(x.left, rank);
+        else if (rank > t)
+            return select(x.right, rank-t-1);
+        return x.key;
+    }
+    
+    public void deleteMin() {
+        root = deleteMin(root);
+    }
+    
+    private Node deleteMin(Node x) {
+        if (x == null) return null;
+        
+        if (x.left == null) return x.right; 
+    
+        x.left = deleteMin(x.left);
+        x.N = size(x.left) + size(x.right) + 1; 
+        return x;
+    }
+    
+    public void delete(Key key) {
+        root = delete(root, key);
+    }
+    
+    private Node delete(Node x, Key key) {
+        if (x == null) return null;
+        int cmp = key.compareTo(x.key);
+        
+        if (cmp > 0) {
+            x.right = delete(x.right, key);
+        } else if (cmp < 0) {
+            x.left = delete(x.left, key);
+        } else {
+            
+            if (x.left == null) 
+                return x.right;
+            else if (x.right == null) 
+                return x.left;
+            else {
+                
+                Node t = x.right;
+                x = min(t.right);
+                x.right = deleteMin(t.right);
+                x.left = t.left; 
+            }
+        }
+        x.N = size(x.left) + size(x.right) + 1;
+        return x;
+    }
+    
 
-public static void main(String[] main){
-	BinarySearchTree <String,Integer> obj= new BinarySearchTree <String,Integer>();
-	obj.put("Ada",1);
-	obj.put("Ballerina",3);
-	obj.get("Ada");
-	obj.put("Html",5);
-	obj.put("Java",7);
-	obj.get("Java");
-	System.out.println(obj.size());
-	System.out.println(obj.min());
-	System.out.println(obj.floor("Ballerina"));
-	//System.out.println(obj.select(3));
-	obj.keys("Ada"," Java");
-	obj.put("Java",8);
-	obj.put("Dart",9);
-	obj.get("Java");
-	System.out.println(obj.size());
-	//System.out.println(obj.deleteMIn());
-	obj.keys("Ballerina", "Java");
-	//System.out.println(obj.delete("Java"));
-
-	}
+public static void main(String[] args){
+    BinarySearchTree<String,Integer> obj=new BinarySearchTree<String,Integer>();
+    obj.put("Ada",1);
+    obj.put("Ballerina",7);
+    System.out.println(obj.get("Ada"));
+    obj.put("Html",5);
+    obj.put("Java",7);
+    System.out.println(obj.get("Java"));
+    System.out.println(obj.size());
+    System.out.println(obj.min());
+    System.out.println(obj.floor("Ballerina"));
+    System.out.println(obj.select(3));
+    //obj.keys("Ada"," Java");
+    obj.put("Java", 8);
+    obj.put("Dart",9);
+    System.out.println(obj.get("Java"));
+    System.out.println(obj.size());
+    obj.deleteMin();
+    //obj.keys("Ballerina", "Java");
+    obj.delete("Java");
+    }
 }
-
